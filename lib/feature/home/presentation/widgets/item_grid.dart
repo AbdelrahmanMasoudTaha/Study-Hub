@@ -47,7 +47,7 @@ class Grid_Item_Container extends StatelessWidget {
               alignment: isSmall! ? Alignment.centerLeft : Alignment.center,
               child: Icon(
                 icon,
-                size: isSmall! ? 80 : 120,
+                size: isSmall! ? 60 : 80,
                 color: Colors.white,
               ),
             ),

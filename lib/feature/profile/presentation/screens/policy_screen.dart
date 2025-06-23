@@ -11,12 +11,12 @@ class PrivacyPolicy extends StatelessWidget {
         title: Text('Privacy policy'),
         centerTitle: true,
       ),
-      body: SingleChildScrollView(
+      body: const SingleChildScrollView(
         child: Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 20),
+          padding: EdgeInsets.symmetric(horizontal: 20),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
-            spacing: 10,
+           // spacing: 10,
             children: [
               Text(
                 '1. Types of Data We Collect',

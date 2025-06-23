@@ -5,35 +5,35 @@ import 'package:flutter_svg/flutter_svg.dart';
 import 'package:get/get.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:intl/intl.dart';
-//import 'package:tasky/services/notification_services%20from%20course.dart';
+import 'package:study_hub/feature/notes/data/task_model.dart';
+import 'package:study_hub/feature/notes/logic/controller/note_controller.dart';
+import 'package:study_hub/feature/notes/presentation/widget/note_tile.dart';
+//import 'package:Notey/services/notification_services%20from%20course.dart';
 
-import '../../../core/Model/task_model.dart';
-import '../logic/controller/task_controller.dart';
 import '../../../core/constants/size_config.dart';
 
 import '../../../core/constants/colors.dart';
 import '../../../core/theme/theme.dart';
 import '../../../core/widget/mybutton.dart';
 
-import 'widget/task_tile.dart';
-import 'add_task_screen.dart';
+import 'add_note_screen.dart';
 
-class ToDoScreen extends StatefulWidget {
-  const ToDoScreen({super.key});
+class NoteScreen extends StatefulWidget {
+  const NoteScreen({super.key});
 
   @override
-  State<ToDoScreen> createState() => _ToDoScreenState();
+  State<NoteScreen> createState() => _NoteScreenState();
 }
 
-class _ToDoScreenState extends State<ToDoScreen> {
+class _NoteScreenState extends State<NoteScreen> {
   @override
   void initState() {
     super.initState();
-    _taskController.getTasks();
+    _NoteController.getNotes();
   }
 
-  final TaskController _taskController = Get.put(TaskController());
-  DateTime _selectedDate = DateTime.now();
+  final NoteController _NoteController = Get.put(NoteController());
+
   @override
   Widget build(BuildContext context) {
     SizeConfig().init(context);
@@ -41,7 +41,7 @@ class _ToDoScreenState extends State<ToDoScreen> {
       appBar: AppBar(
         centerTitle: true,
         title: Text(
-          'Your Tasks',
+          'Your Notes',
           style: headingStyle,
         ),
       ),
@@ -49,16 +49,15 @@ class _ToDoScreenState extends State<ToDoScreen> {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.start,
           children: [
-            _addTaskBar(),
-            _addDateBar(),
-            _showTasks(),
+            _addNoteBar(),
+            _showNotes(),
           ],
         ),
       ),
     );
   }
 
-  Widget _addTaskBar() {
+  Widget _addNoteBar() {
     return Padding(
       padding: const EdgeInsets.only(top: 8, left: 14, bottom: 8, right: 14),
       child: Row(
@@ -78,12 +77,12 @@ class _ToDoScreenState extends State<ToDoScreen> {
             ],
           ),
           MyButton(
-            lable: '+ Add Task',
+            lable: '+ Add Note',
             onTap: () async {
-              await Get.to(() => const AddTaskScreen());
+              await Get.to(() => const AddNoteScreen());
               //ThemeServices().switchMode();
 
-              _taskController.getTasks();
+              _NoteController.getNotes();
             },
           )
         ],
@@ -91,74 +90,45 @@ class _ToDoScreenState extends State<ToDoScreen> {
     );
   }
 
-  _addDateBar() {
-    return Container(
-      margin: const EdgeInsets.only(top: 6, left: 14, bottom: 10),
-      child: DatePicker(
-        DateTime.now(),
-        height: 100,
-        width: 70,
-        selectionColor: MyColors.primaryClr,
-        selectedTextColor: Colors.white,
-        dayTextStyle: GoogleFonts.lato(
-            fontWeight: FontWeight.w600, fontSize: 20, color: Colors.grey),
-        dateTextStyle: GoogleFonts.lato(
-            fontWeight: FontWeight.w600, fontSize: 18, color: Colors.grey),
-        monthTextStyle: GoogleFonts.lato(
-            fontWeight: FontWeight.w600, fontSize: 16, color: Colors.grey),
-        initialSelectedDate: DateTime.now(),
-        onDateChange: (selectedDate) {
-          setState(() {
-            _selectedDate = selectedDate;
-          });
-        },
-      ),
-    );
-  }
-
   Future<void> onRefresh() async {
-    _taskController.getTasks();
+    _NoteController.getNotes();
   }
 
-  _showTasks() {
+  _showNotes() {
     return Expanded(
       child: Obx(
         () {
-          if (_taskController.taskList.isEmpty) {
-            return _noTaskMsg();
+          if (_NoteController.Notes_listt.isEmpty) {
+            return _noNoteMsg();
           } else {
             return RefreshIndicator(
               onRefresh: onRefresh,
               color: MyColors.primaryClr,
               child: ListView.builder(
                 itemBuilder: (context, index) {
-                  var task = _taskController.taskList[index];
-                  if (task.date == DateFormat.yMd().format(_selectedDate)) {
-                    return AnimationConfiguration.staggeredList(
-                      duration: const Duration(milliseconds: 700),
-                      position: index,
-                      child: SlideAnimation(
-                        horizontalOffset: 300,
-                        child: FadeInAnimation(
-                          child: GestureDetector(
-                            onTap: () {
-                              _showBottomSheet(
-                                context,
-                                task,
-                              );
-                            },
-                            child: TaskTile(
-                              task,
-                            ),
+                  var Note = _NoteController.Notes_listt[index];
+                  return AnimationConfiguration.staggeredList(
+                    duration: const Duration(milliseconds: 700),
+                    position: index,
+                    child: SlideAnimation(
+                      horizontalOffset: 300,
+                      child: FadeInAnimation(
+                        child: GestureDetector(
+                          onLongPress: () {
+                            _showBottomSheet(
+                              context,
+                              Note,
+                            );
+                          },
+                          child: NoteTile(
+                            Note,
                           ),
                         ),
                       ),
-                    );
-                  } else {
-                    return Container();
-                  }
+                    ),
+                  );
                 },
-                itemCount: _taskController.taskList.length,
+                itemCount: _NoteController.Notes_listt.length,
               ),
             );
           }
@@ -200,18 +170,12 @@ class _ToDoScreenState extends State<ToDoScreen> {
     );
   }
 
-  _showBottomSheet(BuildContext context, Task task) {
+  _showBottomSheet(BuildContext context, Note Note) {
     Get.bottomSheet(SingleChildScrollView(
       child: Container(
         padding: const EdgeInsets.only(top: 4),
         width: SizeConfig.screenWidth,
-        height: (SizeConfig.orientation == Orientation.landscape)
-            ? (task.isCompleted == 1
-                ? SizeConfig.screenHeight * 0.6
-                : SizeConfig.screenHeight * 0.8)
-            : (task.isCompleted == 1
-                ? SizeConfig.screenHeight * 0.3
-                : SizeConfig.screenHeight * 0.4),
+        height: (SizeConfig.screenHeight * 0.6),
         color: Get.isDarkMode ? MyColors.darkHeaderClr : Colors.white,
         child: Column(
           children: [
@@ -225,34 +189,28 @@ class _ToDoScreenState extends State<ToDoScreen> {
                         Get.isDarkMode ? Colors.grey[600] : Colors.grey[300]),
               ),
             ),
-            task.isCompleted == 1
-                ? Container()
-                : _buildButtomSheet(
-                    lable: 'Task Completed',
-                    onTap: () {
-                      _taskController.setTaskAsCompleted(taskId: task.id!);
-
-                      Get.back();
-                    },
-                    clr: MyColors.primaryClr,
-                  ),
-            task.isCompleted == 1
-                ? Container()
-                : Divider(
-                    color: Get.isDarkMode
-                        ? Colors.grey
-                        : const Color.fromARGB(255, 206, 197, 197),
-                    endIndent: 20,
-                    indent: 20,
-                  ),
             _buildButtomSheet(
               lable: 'Delete',
               onTap: () {
-                _taskController.deleteTask(task: task);
+                _NoteController.deleteNote(note: Note);
 
                 Get.back();
               },
               clr: Colors.red,
+            ),
+            Divider(
+              color: Get.isDarkMode
+                  ? const Color.fromARGB(255, 204, 194, 194)
+                  : const Color.fromARGB(255, 206, 197, 197),
+              endIndent: 20,
+              indent: 20,
+            ),
+            _buildButtomSheet(
+              lable: 'Update',
+              onTap: () {
+                _showUpdateDialog(context, Note);
+              },
+              clr: MyColors.bluishClr,
             ),
             Divider(
               color: Get.isDarkMode
@@ -273,7 +231,84 @@ class _ToDoScreenState extends State<ToDoScreen> {
     ));
   }
 
-  _noTaskMsg() {
+  _showUpdateDialog(BuildContext context, Note note) {
+    final TextEditingController _titleController =
+        TextEditingController(text: note.title);
+
+    Get.dialog(
+      AlertDialog(
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(20),
+        ),
+        backgroundColor: context.theme.scaffoldBackgroundColor,
+        title: Center(child: Text("Update Note", style: headingStyle)),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Text("Enter a new title for your note.", style: subTitleStyle),
+            const SizedBox(height: 20),
+            TextField(
+              controller: _titleController,
+              autofocus: true,
+              decoration: InputDecoration(
+                labelText: "Title",
+                hintText: "Enter new title",
+                border: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(12),
+                ),
+              ),
+              onSubmitted: (value) {
+                if (_titleController.text.isNotEmpty) {
+                  _NoteController.updateNote(
+                    note: Note(
+                      id: note.id,
+                      title: _titleController.text,
+                      note: note.note,
+                      color: note.color,
+                    ),
+                  );
+                  Get.back(); // Close dialog
+                  Get.back(); // Close bottom sheet
+                }
+              },
+            ),
+          ],
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Get.back(),
+            child: Text("Cancel", style: titleStyle),
+          ),
+          ElevatedButton(
+            style: ElevatedButton.styleFrom(
+              backgroundColor: MyColors.primaryClr,
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(12),
+              ),
+              minimumSize: const Size(120, 48),
+            ),
+            onPressed: () {
+              if (_titleController.text.isNotEmpty) {
+                _NoteController.updateNote(
+                  note: Note(
+                    id: note.id,
+                    title: _titleController.text,
+                    note: note.note,
+                    color: note.color,
+                  ),
+                );
+                Get.back(); // Close dialog
+                Get.back(); // Close bottom sheet
+              }
+            },
+            child: const Text("Update"),
+          ),
+        ],
+      ),
+    );
+  }
+
+  _noNoteMsg() {
     return Stack(
       children: [
         AnimatedPositioned(
@@ -297,8 +332,8 @@ class _ToDoScreenState extends State<ToDoScreen> {
                           height: 230,
                         ),
                   SvgPicture.asset(
-                    'assets/images/task.svg',
-                    semanticsLabel: 'Task',
+                    'assets/images/Note.svg',
+                    semanticsLabel: 'Note',
                     color: MyColors.primaryClr.withOpacity(0.65),
                     height: 100,
                   ),
@@ -306,7 +341,7 @@ class _ToDoScreenState extends State<ToDoScreen> {
                     padding: const EdgeInsets.symmetric(
                         horizontal: 30, vertical: 10),
                     child: Text(
-                      'You do not have any Tasks yet! \n Add new tasks to make your day prefect',
+                      'You do not have any Notes yet! \n Add new Notes to make your day prefect',
                       style: subTitleStyle,
                       textAlign: TextAlign.center,
                     ),

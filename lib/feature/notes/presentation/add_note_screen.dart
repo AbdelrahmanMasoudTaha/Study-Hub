@@ -5,31 +5,30 @@ import 'dart:developer';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:intl/intl.dart';
+import 'package:study_hub/feature/notes/data/task_model.dart';
+import 'package:study_hub/feature/notes/logic/controller/note_controller.dart';
 
 import '../../../core/Model/task_model.dart';
-import '../logic/controller/task_controller.dart';
+import '../../to_do/logic/controller/task_controller.dart';
 import '../../../core/constants/colors.dart';
 import '../../../core/theme/theme.dart';
 import '../../../core/widget/my_input_field.dart';
 import '../../../core/widget/mybutton.dart';
 
-class AddTaskScreen extends StatefulWidget {
-  const AddTaskScreen({super.key});
+class AddNoteScreen extends StatefulWidget {
+  const AddNoteScreen({super.key});
 
   @override
-  State<AddTaskScreen> createState() => _AddTaskScreenState();
+  State<AddNoteScreen> createState() => _AddTaskScreenState();
 }
 
-class _AddTaskScreenState extends State<AddTaskScreen> {
-  final TaskController _taskController = Get.put(TaskController());
+class _AddTaskScreenState extends State<AddNoteScreen> {
+  final NoteController _theMainNoteController = Get.put(NoteController());
   final TextEditingController _titleController = TextEditingController();
   final TextEditingController _noteController = TextEditingController();
   DateTime _selectedDate = DateTime.now();
   // ignore: unused_field, prefer_final_fields
-  String _startDate = DateFormat('hh:mm a').format(DateTime.now()).toString();
-  String _endDate = DateFormat('hh:mm a')
-      .format(DateTime.now().add(const Duration(minutes: 15)))
-      .toString();
+
   int _selctedColor = 0;
   @override
   Widget build(BuildContext context) {
@@ -41,7 +40,7 @@ class _AddTaskScreenState extends State<AddTaskScreen> {
           child: Column(
             children: [
               Text(
-                'Add Task',
+                'Add Note',
                 style: headingStyle,
               ),
               MyInputField(
@@ -54,66 +53,13 @@ class _AddTaskScreenState extends State<AddTaskScreen> {
                 hint: 'Enter note here',
                 controller: _noteController,
               ),
-              MyInputField(
-                title: 'Date',
-                hint: DateFormat.yMd().format(_selectedDate),
-                widget: IconButton(
-                  icon: const Icon(
-                    Icons.calendar_today_outlined,
-                    color: Colors.grey,
-                  ),
-                  onPressed: () {
-                    _getDateFromUser();
-                  },
-                ),
-              ),
-              Row(
-                children: [
-                  Expanded(
-                    child: MyInputField(
-                      title: 'Start Time',
-                      hint: _startDate,
-                      widget: IconButton(
-                        icon: const Icon(
-                          Icons.access_time_rounded,
-                          color: Colors.grey,
-                        ),
-                        onPressed: () {
-                          _getTimeFromUser(isStartTime: true);
-                        },
-                      ),
-                    ),
-                  ),
-                  const SizedBox(
-                    width: 10,
-                  ),
-                  Expanded(
-                    child: MyInputField(
-                      title: 'End Time',
-                      hint: _endDate,
-                      widget: IconButton(
-                        icon: const Icon(
-                          Icons.access_time_rounded,
-                          color: Colors.grey,
-                        ),
-                        onPressed: () {
-                          _getTimeFromUser(isStartTime: false);
-                        },
-                      ),
-                    ),
-                  ),
-                ],
-              ),
-              const SizedBox(
-                height: 14,
-              ),
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 crossAxisAlignment: CrossAxisAlignment.center,
                 children: [
                   _colorPalet(),
                   MyButton(
-                      lable: 'Creat Task',
+                      lable: 'Creat Note',
                       onTap: () {
                         _validateTask();
                         if (_noteController.text.isNotEmpty &&
@@ -151,7 +97,7 @@ class _AddTaskScreenState extends State<AddTaskScreen> {
 
   _validateTask() {
     if (_noteController.text.isNotEmpty && _titleController.text.isNotEmpty) {
-      _addTaskToDb();
+      _addNoteToDb();
     } else if (_noteController.text.isEmpty || _titleController.text.isEmpty) {
       Get.snackbar('Required Feild', "Please Fill All Feilds",
           snackPosition: SnackPosition.BOTTOM,
@@ -166,16 +112,12 @@ class _AddTaskScreenState extends State<AddTaskScreen> {
     }
   }
 
-  _addTaskToDb() async {
-    await _taskController.addTask(
-        task: Task(
+  _addNoteToDb() async {
+    await _theMainNoteController.addNote(
+        note: Note(
       title: _titleController.text,
       note: _noteController.text,
       color: _selctedColor,
-      date: DateFormat.yMd().format(_selectedDate),
-      endTime: _endDate,
-      startTime: _startDate,
-      isCompleted: 0,
     ));
   }
 
@@ -218,50 +160,5 @@ class _AddTaskScreenState extends State<AddTaskScreen> {
         )
       ],
     );
-  }
-
-  void _getTimeFromUser({required bool isStartTime}) async {
-    TimeOfDay? _pickedTime = await showTimePicker(
-        context: context,
-        initialEntryMode: TimePickerEntryMode.input,
-        initialTime: isStartTime
-            ? TimeOfDay.fromDateTime(DateTime.now())
-            : TimeOfDay.fromDateTime(
-                DateTime.now().add(const Duration(minutes: 15))));
-    if (_pickedTime != null) {
-      String _formattedTime = _pickedTime.format(context);
-      if (isStartTime) setState(() => _startDate = _formattedTime);
-      if (!isStartTime) setState(() => _endDate = _formattedTime);
-    } else {
-      log('picked time is null');
-    }
-  }
-
-  void _getDateFromUser() async {
-    DateTime? _pickedDate = await showDatePicker(
-        context: context,
-        initialEntryMode: DatePickerEntryMode.calendar,
-        builder: (BuildContext context, Widget? child) {
-          return MediaQuery(
-            data: MediaQuery.of(context)
-                .copyWith(alwaysUse24HourFormat: false), // Force 12-hour format
-            child: child!,
-          );
-        },
-        firstDate: DateTime(
-          DateTime.now().year - 1,
-        ),
-        lastDate: DateTime(
-          DateTime.now().year + 2,
-        ),
-        initialDate: _selectedDate);
-
-    if (_pickedDate != null) {
-      setState(() {
-        _selectedDate = _pickedDate;
-      });
-    } else {
-      log('picked date is null');
-    }
   }
 }
