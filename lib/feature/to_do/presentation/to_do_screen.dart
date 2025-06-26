@@ -5,6 +5,7 @@ import 'package:flutter_svg/flutter_svg.dart';
 import 'package:get/get.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:intl/intl.dart';
+import 'package:study_hub/core/helpers/helper_functions.dart';
 //import 'package:tasky/services/notification_services%20from%20course.dart';
 
 import '../../../core/Model/task_model.dart';
@@ -36,10 +37,15 @@ class _ToDoScreenState extends State<ToDoScreen> {
   DateTime _selectedDate = DateTime.now();
   @override
   Widget build(BuildContext context) {
+    final isDarkMode = MyHelperFunctions.isDarkMode(context);
     SizeConfig().init(context);
     return Scaffold(
       appBar: AppBar(
         centerTitle: true,
+        backgroundColor: Colors.transparent,
+        elevation: 0,
+        iconTheme:
+            IconThemeData(color: isDarkMode ? Colors.white : Colors.black),
         title: Text(
           'Your Tasks',
           style: headingStyle,
@@ -215,6 +221,9 @@ class _ToDoScreenState extends State<ToDoScreen> {
         color: Get.isDarkMode ? MyColors.darkHeaderClr : Colors.white,
         child: Column(
           children: [
+            const SizedBox(
+              height: 8,
+            ),
             Flexible(
               child: Container(
                 height: 6,
@@ -224,6 +233,9 @@ class _ToDoScreenState extends State<ToDoScreen> {
                     color:
                         Get.isDarkMode ? Colors.grey[600] : Colors.grey[300]),
               ),
+            ),
+            const SizedBox(
+              height: 10,
             ),
             task.isCompleted == 1
                 ? Container()

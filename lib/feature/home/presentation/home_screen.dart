@@ -1,11 +1,12 @@
-import 'dart:math';
-
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_staggered_grid_view/flutter_staggered_grid_view.dart';
 import 'package:study_hub/feature/notes/presentation/note_screen.dart';
 import 'package:study_hub/feature/ocr/presentation/ocr_img_screen.dart';
 import 'package:study_hub/feature/pdfs/presentation/screens/manipulation_screen.dart';
 import 'package:study_hub/feature/pdfs/presentation/widgets/pdf_screen.dart';
+import 'package:study_hub/feature/promodoro/logic/timer_bloc.dart';
+import 'package:study_hub/feature/promodoro/presentation/screens/promodoro_screen.dart';
 import 'package:study_hub/feature/summarization/presentation/summarize_screen.dart';
 import 'package:study_hub/feature/text_to_speach/presentation/screens/text_to_speech.dart';
 import 'package:study_hub/feature/to_do/presentation/to_do_screen.dart';
@@ -18,9 +19,6 @@ class HomePage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final screenWidth = MediaQuery.of(context).size.width;
-    final crossAxisCount = max((screenWidth / 200).floor(), 2);
-    final childCrossAxisCellCount = crossAxisCount >= 4 ? 2 : 1;
     return Scaffold(
       extendBody: true,
       body: SafeArea(
@@ -39,29 +37,18 @@ class HomePage extends StatelessWidget {
                 // Staggered Grid View
                 Container(
                   child: StaggeredGrid.count(
-                    crossAxisCount: crossAxisCount,
-                    mainAxisSpacing: 15,
-                    crossAxisSpacing: 15,
+                    crossAxisCount: 2,
+                    mainAxisSpacing: 10,
+                    //mainAxisSpacing: 15,
+                    crossAxisSpacing: 10,
+                    //crossAxisSpacing: 15,
                     children: [
-                      //to do
-                      StaggeredGridTile.count(
-                        crossAxisCellCount: childCrossAxisCellCount,
-                        mainAxisCellCount: 1,
-                        child: Grid_Item_Container(
-                          function: () {
-                            Navigator.of(context).push(MaterialPageRoute(
-                              builder: (context) => const ToDoScreen(),
-                            ));
-                          },
-                          color: Colors.green,
-                          icon: Icons.task_alt_rounded,
-                          title: "To Do",
-                        ),
-                      ),
                       //summartions
                       StaggeredGridTile.count(
-                        crossAxisCellCount: childCrossAxisCellCount,
-                        mainAxisCellCount: 0.8,
+                        crossAxisCellCount: 1,
+                        mainAxisCellCount: 0.9,
+
+                        /// mainAxisCellCount: 0.8,
                         child: Grid_Item_Container(
                           color: Colors.blue,
                           isSmall: true,
@@ -76,7 +63,7 @@ class HomePage extends StatelessWidget {
                       ),
                       //OCR
                       StaggeredGridTile.count(
-                        crossAxisCellCount: childCrossAxisCellCount,
+                        crossAxisCellCount: 1,
                         mainAxisCellCount: 1.1,
                         child: Grid_Item_Container(
                           function: () {
@@ -91,8 +78,8 @@ class HomePage extends StatelessWidget {
                       ),
                       //Translation
                       StaggeredGridTile.count(
-                        crossAxisCellCount: childCrossAxisCellCount,
-                        mainAxisCellCount: 0.8,
+                        crossAxisCellCount: 1,
+                        mainAxisCellCount: 1,
                         child: Grid_Item_Container(
                           function: () {
                             Navigator.of(context).push(MaterialPageRoute(
@@ -107,7 +94,7 @@ class HomePage extends StatelessWidget {
                       ),
                       //pdf
                       StaggeredGridTile.count(
-                        crossAxisCellCount: childCrossAxisCellCount,
+                        crossAxisCellCount: 1,
                         mainAxisCellCount: 0.9,
                         child: Grid_Item_Container(
                           function: () {
@@ -122,8 +109,8 @@ class HomePage extends StatelessWidget {
                       ),
                       //  text to speech
                       StaggeredGridTile.count(
-                        crossAxisCellCount: childCrossAxisCellCount,
-                        mainAxisCellCount: 0.9,
+                        crossAxisCellCount: 1,
+                        mainAxisCellCount: 1,
                         child: Grid_Item_Container(
                           function: () {
                             Navigator.of(context).push(MaterialPageRoute(
@@ -136,15 +123,35 @@ class HomePage extends StatelessWidget {
                           title: "Listen to Text",
                         ),
                       ),
-                      //Pomodoro
+                      //to do
                       StaggeredGridTile.count(
-                        crossAxisCellCount: childCrossAxisCellCount,
-                        mainAxisCellCount: 1.1,
+                        crossAxisCellCount: 1,
+                        mainAxisCellCount: 1,
                         child: Grid_Item_Container(
                           function: () {
                             Navigator.of(context).push(MaterialPageRoute(
-                              builder: (context) => const NoteScreen(),
+                              builder: (context) => const ToDoScreen(),
                             ));
+                          },
+                          color: Colors.green,
+                          icon: Icons.task_alt_rounded,
+                          title: "To Do",
+                        ),
+                      ),
+                      //Pomodoro
+                      StaggeredGridTile.count(
+                        crossAxisCellCount: 1,
+                        mainAxisCellCount: 0.9,
+                        child: Grid_Item_Container(
+                          function: () {
+                            Navigator.of(context).push(
+                              MaterialPageRoute(
+                                builder: (context) => BlocProvider<TimerBloc>(
+                                  create: (_) => TimerBloc(),
+                                  child: const PromodoroScreen(),
+                                ),
+                              ),
+                            );
                           },
                           color: Colors.indigo,
                           icon: Icons.timer,
@@ -154,8 +161,8 @@ class HomePage extends StatelessWidget {
 
                       //notes
                       StaggeredGridTile.count(
-                        crossAxisCellCount: childCrossAxisCellCount,
-                        mainAxisCellCount: 1,
+                        crossAxisCellCount: 1,
+                        mainAxisCellCount: 0.8,
                         child: Grid_Item_Container(
                           function: () {
                             Navigator.of(context).push(MaterialPageRoute(

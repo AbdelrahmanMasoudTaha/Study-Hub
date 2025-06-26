@@ -12,6 +12,7 @@ import '../../../core/constants/colors.dart';
 import '../../../core/theme/theme.dart';
 import '../../../core/widget/my_input_field.dart';
 import '../../../core/widget/mybutton.dart';
+import 'package:study_hub/core/helpers/helper_functions.dart';
 
 class AddTaskScreen extends StatefulWidget {
   const AddTaskScreen({super.key});
@@ -130,24 +131,30 @@ class _AddTaskScreenState extends State<AddTaskScreen> {
     );
   }
 
-  AppBar _appBar() => AppBar(
-        // backgroundColor: context.theme.primaryColor,
-        leading: IconButton(
-          icon: const Icon(Icons.arrow_back),
-          onPressed: () {
-            Get.back();
-          },
-        ),
-        // actions: const [
-        //   Padding(
-        //     padding: EdgeInsets.only(right: 8.0),
-        //     child: CircleAvatar(
-        //       backgroundImage: AssetImage('assets/images/person.jpeg'),
-        //       radius: 24,
-        //     ),
-        //   ),
-        // ],
-      );
+  AppBar _appBar() {
+    final isDarkMode = MyHelperFunctions.isDarkMode(context);
+    return AppBar(
+      // backgroundColor: context.theme.primaryColor,
+      leading: IconButton(
+        icon: const Icon(Icons.arrow_back),
+        onPressed: () {
+          Get.back();
+        },
+      ),
+      iconTheme: IconThemeData(
+        color: isDarkMode ? Colors.white : Colors.black,
+      ),
+      // actions: const [
+      //   Padding(
+      //     padding: EdgeInsets.only(right: 8.0),
+      //     child: CircleAvatar(
+      //       backgroundImage: AssetImage('assets/images/person.jpeg'),
+      //       radius: 24,
+      //     ),
+      //   ),
+      // ],
+    );
+  }
 
   _validateTask() {
     if (_noteController.text.isNotEmpty && _titleController.text.isNotEmpty) {

@@ -5,6 +5,7 @@ import 'package:flutter_svg/flutter_svg.dart';
 import 'package:get/get.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:intl/intl.dart';
+import 'package:study_hub/core/helpers/helper_functions.dart';
 import 'package:study_hub/feature/notes/data/task_model.dart';
 import 'package:study_hub/feature/notes/logic/controller/note_controller.dart';
 import 'package:study_hub/feature/notes/presentation/widget/note_tile.dart';
@@ -36,10 +37,15 @@ class _NoteScreenState extends State<NoteScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final isDarkMode = MyHelperFunctions.isDarkMode(context);
     SizeConfig().init(context);
     return Scaffold(
       appBar: AppBar(
         centerTitle: true,
+        backgroundColor: Colors.transparent,
+        elevation: 0,
+        iconTheme:
+            IconThemeData(color: isDarkMode ? Colors.white : Colors.black),
         title: Text(
           'Your Notes',
           style: headingStyle,

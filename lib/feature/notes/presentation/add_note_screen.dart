@@ -4,7 +4,9 @@ import 'dart:developer';
 
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:google_fonts/google_fonts.dart';
 import 'package:intl/intl.dart';
+import 'package:study_hub/core/helpers/helper_functions.dart';
 import 'package:study_hub/feature/notes/data/task_model.dart';
 import 'package:study_hub/feature/notes/logic/controller/note_controller.dart';
 
@@ -32,8 +34,15 @@ class _AddTaskScreenState extends State<AddNoteScreen> {
   int _selctedColor = 0;
   @override
   Widget build(BuildContext context) {
+    final isDarkMode = MyHelperFunctions.isDarkMode(context);
     return Scaffold(
-      appBar: _appBar(),
+      appBar: AppBar(
+        centerTitle: true,
+        backgroundColor: Colors.transparent,
+        elevation: 0,
+        iconTheme:
+            IconThemeData(color: isDarkMode ? Colors.white : Colors.black),
+      ),
       body: Container(
         padding: const EdgeInsets.all(12),
         child: SingleChildScrollView(
@@ -41,7 +50,11 @@ class _AddTaskScreenState extends State<AddNoteScreen> {
             children: [
               Text(
                 'Add Note',
-                style: headingStyle,
+                style: GoogleFonts.lato(
+                    textStyle: TextStyle(
+                        fontWeight: FontWeight.bold,
+                        fontSize: 24,
+                        color: isDarkMode ? Colors.white : Colors.black)),
               ),
               MyInputField(
                 title: 'Title',
@@ -52,6 +65,9 @@ class _AddTaskScreenState extends State<AddNoteScreen> {
                 title: 'Note',
                 hint: 'Enter note here',
                 controller: _noteController,
+              ),
+              SizedBox(
+                height: 20,
               ),
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -75,25 +91,6 @@ class _AddTaskScreenState extends State<AddNoteScreen> {
       ),
     );
   }
-
-  AppBar _appBar() => AppBar(
-        // backgroundColor: context.theme.primaryColor,
-        leading: IconButton(
-          icon: const Icon(Icons.arrow_back),
-          onPressed: () {
-            Get.back();
-          },
-        ),
-        // actions: const [
-        //   Padding(
-        //     padding: EdgeInsets.only(right: 8.0),
-        //     child: CircleAvatar(
-        //       backgroundImage: AssetImage('assets/images/person.jpeg'),
-        //       radius: 24,
-        //     ),
-        //   ),
-        // ],
-      );
 
   _validateTask() {
     if (_noteController.text.isNotEmpty && _titleController.text.isNotEmpty) {

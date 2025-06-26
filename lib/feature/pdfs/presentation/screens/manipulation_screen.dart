@@ -4,6 +4,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:loading_animation_widget/loading_animation_widget.dart';
 import 'package:study_hub/core/constants/colors.dart';
+import 'package:study_hub/core/helpers/helper_functions.dart';
+import 'package:study_hub/feature/ocr/presentation/Ocr_PDF/ocr_pdf.dart';
 import 'package:study_hub/feature/pdfs/data/pdf_manipulation.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'package:open_file/open_file.dart';
@@ -11,6 +13,7 @@ import 'package:study_hub/feature/pdfs/logic/bloc/pdf_manipulation_bloc.dart';
 import 'package:study_hub/feature/pdfs/presentation/widgets/action_card.dart';
 import 'package:study_hub/feature/pdfs/presentation/widgets/dialogs.dart';
 import '../widgets/pdf_screen.dart';
+import 'package:permission_handler/permission_handler.dart';
 
 class ManipulationScreen extends StatelessWidget {
   const ManipulationScreen({Key? key}) : super(key: key);
@@ -36,6 +39,7 @@ class _ManipulationViewState extends State<_ManipulationView> {
 
   @override
   Widget build(BuildContext context) {
+    final isDarkMode = MyHelperFunctions.isDarkMode(context);
     return BlocListener<PdfManipulationBloc, PdfManipulationState>(
       listener: (context, state) {
         if (state is PdfManipulationLoading) {
@@ -71,6 +75,8 @@ class _ManipulationViewState extends State<_ManipulationView> {
           Scaffold(
             appBar: AppBar(
               title: const Text('PDF Manipulation'),
+              iconTheme: IconThemeData(
+                  color: isDarkMode ? Colors.white : Colors.black),
             ),
             body: Padding(
               padding: const EdgeInsets.all(16.0),
@@ -96,9 +102,26 @@ class _ManipulationViewState extends State<_ManipulationView> {
                     ActionCard(
                       title: 'Merge PDFs',
                       description: 'Combine multiple PDF files into one',
-                      onPressed: () => context
-                          .read<PdfManipulationBloc>()
-                          .add(MergePdfsRequested()),
+                      onPressed: () async {
+                        if (Theme.of(context).platform ==
+                            TargetPlatform.android) {
+                          var status = await Permission.storage.status;
+                          if (!status.isGranted) {
+                            status = await Permission.storage.request();
+                          }
+                          if (!status.isGranted) {
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              const SnackBar(
+                                  content: Text(
+                                      'Storage permission is required to merge PDFs.')),
+                            );
+                            return;
+                          }
+                        }
+                        context
+                            .read<PdfManipulationBloc>()
+                            .add(MergePdfsRequested());
+                      },
                       color: Colors.green,
                       icon: Icons.merge_type,
                     ),
@@ -150,6 +173,20 @@ class _ManipulationViewState extends State<_ManipulationView> {
                       },
                       color: MyColors.pinkClr,
                       icon: Icons.photo_library,
+                    ),
+                    const SizedBox(height: 16),
+                    ActionCard(
+                      title: 'PDF to Text',
+                      description: 'Extract text from PDF',
+                      onPressed: () async {
+                        Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (context) => OcrPdfScreen(),
+                            ));
+                      },
+                      color: Color.fromARGB(255, 36, 177, 175),
+                      icon: Icons.text_format,
                     ),
                     const SizedBox(height: 16),
                     ActionCard(

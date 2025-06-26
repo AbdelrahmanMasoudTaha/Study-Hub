@@ -5,8 +5,13 @@ import 'package:study_hub/core/constants/colors.dart';
 class CustomButton extends StatelessWidget {
   final String label;
   final VoidCallback onPressed;
+  final bool isLoading;
 
-  const CustomButton({super.key, required this.label, required this.onPressed});
+  const CustomButton(
+      {super.key,
+      required this.label,
+      required this.onPressed,
+      this.isLoading = false});
 
   @override
   Widget build(BuildContext context) {
@@ -18,10 +23,10 @@ class CustomButton extends StatelessWidget {
         borderRadius: BorderRadius.circular(30),
       ),
       child: CupertinoButton(
-        onPressed: onPressed,
+        onPressed: isLoading ? null : onPressed,
         child: Text(
           label,
-          style: TextStyle(
+          style: const TextStyle(
             color: Colors.white,
             fontSize: 16,
             fontWeight: FontWeight.bold,

@@ -3,7 +3,9 @@ import 'package:flutter/foundation.dart';
 
 class TextToSpeechRepository {
   final Dio _dio = Dio();
-  final String _endpoint = 'http://192.168.1.6:5000/models/text_to_speech';
+  //final String _endpoint = 'http://192.168.1.6:5000/models/text_to_speech';
+  final String _endpoint =
+      'https://cd6f-41-37-182-95.ngrok-free.app/models/text_to_speech';
 
   Future<Uint8List> getSpeech(String text) async {
     try {

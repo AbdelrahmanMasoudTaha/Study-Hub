@@ -3,7 +3,9 @@ import 'package:http/http.dart' as http;
 
 class SummarizeService {
   // API
-  static const String baseUrl = 'http://192.168.1.6:5000';
+  // static const String baseUrl = 'http://192.168.1.6:5000';
+
+  static const String baseUrl = 'https://cd6f-41-37-182-95.ngrok-free.app';
   static const String endpoint = '/text/summeariz';
 
   Future<SummarizeResponse> summarizeText(String text) async {

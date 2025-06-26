@@ -1,8 +1,10 @@
-
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
-import 'package:google_fonts/google_fonts.dart';
 import 'package:study_hub/core/constants/colors.dart';
+import 'package:study_hub/core/widget/custom_button.dart';
+import 'package:study_hub/core/widget/custom_text_input.dart';
+import 'package:awesome_snackbar_content/awesome_snackbar_content.dart';
+import 'package:loading_animation_widget/loading_animation_widget.dart';
 
 final _firebase = FirebaseAuth.instance;
 
@@ -16,207 +18,262 @@ class LoginScreen extends StatefulWidget {
 class _LoginScreenState extends State<LoginScreen> {
   final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
   bool _islogin = true;
-  String _enterdEmail = '';
-  String _enterdUsername = '';
-  String _enterdPasswoud = '';
   bool _isUploading = false;
+  bool _showPassword = false;
 
-  void _supmit() async {
-    bool vaild = _formKey.currentState!.validate();
-    if (!vaild) {
-      // log("dEmail");
-      return;
-    }
+  final TextEditingController _emailController = TextEditingController();
+  final TextEditingController _usernameController = TextEditingController();
+  final TextEditingController _passwordController = TextEditingController();
+
+  @override
+  void dispose() {
+    _emailController.dispose();
+    _usernameController.dispose();
+    _passwordController.dispose();
+    super.dispose();
+  }
+
+  void _showAwesomeSnackbar(String title, String message, ContentType type) {
+    final snackBar = SnackBar(
+      elevation: 0,
+      backgroundColor: Colors.transparent,
+      behavior: SnackBarBehavior.floating,
+      content: AwesomeSnackbarContent(
+        title: title,
+        message: message,
+        contentType: type,
+      ),
+    );
+    ScaffoldMessenger.of(context)
+      ..clearSnackBars()
+      ..showSnackBar(snackBar);
+  }
+
+  void _submit() async {
+    bool valid = _formKey.currentState!.validate();
+    if (!valid) return;
+    setState(() {
+      _isUploading = true;
+    });
     try {
-      // log("_enterdEmail");
-      setState(() {
-        _isUploading = true;
-      });
       if (_islogin) {
-        // final UserCredential userCredential =
         await _firebase.signInWithEmailAndPassword(
-          email: _enterdEmail,
-          password: _enterdPasswoud,
+          email: _emailController.text.trim(),
+          password: _passwordController.text.trim(),
         );
+        _showAwesomeSnackbar(
+            'Success', 'Logged in successfully!', ContentType.success);
       } else {
-        //log(_enterdEmail);
-
         await _firebase.createUserWithEmailAndPassword(
-          email: _enterdEmail,
-          password: _enterdPasswoud,
+          email: _emailController.text.trim(),
+          password: _passwordController.text.trim(),
         );
-
-        //log(_enterdEmail);
-        // log(_enterdPasswoud);
+        _showAwesomeSnackbar(
+            'Success', 'Account created successfully!', ContentType.success);
       }
     } on FirebaseAuthException catch (e) {
-      ScaffoldMessenger.of(context).clearSnackBars();
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text(e.message ?? 'Authentication faild.'),
-        ),
-      );
-      setState(() {
-        _isUploading = false;
-      });
+      _showAwesomeSnackbar(
+          'Error', e.message ?? 'Authentication failed.', ContentType.failure);
     }
-    _formKey.currentState!.save();
+    setState(() {
+      _isUploading = false;
+    });
   }
 
   @override
   Widget build(BuildContext context) {
+    final isDarkMode = Theme.of(context).brightness == Brightness.dark;
     return Scaffold(
-      //
-      backgroundColor: Theme.of(context).primaryColor,
-      body: Center(
-        child: SingleChildScrollView(
-          child: Column(
-            children: [
-              Container(
-                margin: const EdgeInsets.symmetric(
-                  horizontal: 20.0,
-                  vertical: 30,
-                ),
-                width: 200,
-                child: Image.asset('assets/images/login.png'),
-              ),
-              Card(
-                margin: const EdgeInsets.all(20),
-                child: SingleChildScrollView(
-                  child: Padding(
-                    padding: const EdgeInsets.all(16),
-                    child: Form(
-                      key: _formKey,
-                      child: Column(
+      backgroundColor: Theme.of(context).scaffoldBackgroundColor,
+      body: Stack(
+        children: [
+          Center(
+            child: SingleChildScrollView(
+              child: Padding(
+                padding:
+                    const EdgeInsets.symmetric(horizontal: 24, vertical: 32),
+                child: Form(
+                  key: _formKey,
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    crossAxisAlignment: CrossAxisAlignment.center,
+                    children: [
+                      const SizedBox(height: 18),
+                      Text(
+                        'Welcome to Study Hub',
+                        style: TextStyle(
+                          fontWeight: FontWeight.bold,
+                          fontSize: 32,
+                          color: isDarkMode ? MyColors.white : MyColors.black,
+                        ),
+                      ),
+                      const SizedBox(height: 6),
+                      Text(
+                        'Connect this device to your account.',
+                        style: TextStyle(
+                          color:
+                              isDarkMode ? Colors.grey[300] : Colors.grey[600],
+                          fontSize: 14,
+                        ),
+                      ),
+                      const SizedBox(height: 24),
+                      if (!_islogin) ...[
+                        CustomTextInput(
+                          hintText: 'Enter your username',
+                          labelText: 'Username',
+                          controller: _usernameController,
+                        ),
+                        const SizedBox(height: 18),
+                      ],
+                      CustomTextInput(
+                        hintText: 'Email',
+                        labelText: 'Email',
+                        controller: _emailController,
+                        iconData: Icons.email,
+                      ),
+                      const SizedBox(height: 18),
+                      Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          if (!_islogin)
-                            TextFormField(
-                              validator: (value) {
-                                if (value == null || value.trim().length < 4) {
-                                  return 'Please enter at least 4 character';
-                                }
-                                return null;
-                              },
-                              onSaved: (newValue) =>
-                                  _enterdUsername = newValue!,
-                              decoration: InputDecoration(
-                                label: Text(
-                                  'Username',
-                                  style: GoogleFonts.alef(
-                                    fontWeight: FontWeight.w400,
-                                    fontSize: 18,
-                                  ),
-                                ),
-                              ),
+                          Text(
+                            'Password',
+                            style: TextStyle(
+                              fontSize: 12,
+                              color:
+                                  isDarkMode ? Colors.grey[300] : Colors.grey,
+                              fontWeight: FontWeight.w600,
                             ),
-                          const SizedBox(
-                            height: 12,
                           ),
-                          TextFormField(
-                            validator: (value) {
-                              if (value == null ||
-                                  value.trim().isEmpty ||
-                                  !value.contains('@')) {
-                                return 'Please enter a valid email adderss';
-                              }
-                              return null;
-                            },
-                            onSaved: (newValue) => _enterdEmail = newValue!,
+                          const SizedBox(height: 8),
+                          TextField(
+                            controller: _passwordController,
+                            obscureText: !_showPassword,
+                            style: TextStyle(
+                              color:
+                                  isDarkMode ? MyColors.white : MyColors.black,
+                            ),
                             decoration: InputDecoration(
-                              label: Text(
-                                'Email',
-                                style: GoogleFonts.alef(
-                                  fontWeight: FontWeight.w400,
-                                  fontSize: 18,
+                              hintText: 'Password',
+                              hintStyle: TextStyle(
+                                color:
+                                    isDarkMode ? Colors.grey[400] : Colors.grey,
+                              ),
+                              suffixIcon: IconButton(
+                                icon: Icon(
+                                  _showPassword
+                                      ? Icons.visibility
+                                      : Icons.visibility_off,
+                                  color:
+                                      isDarkMode ? MyColors.white : Colors.grey,
+                                ),
+                                onPressed: () {
+                                  setState(() {
+                                    _showPassword = !_showPassword;
+                                  });
+                                },
+                              ),
+                              border: OutlineInputBorder(
+                                borderRadius: BorderRadius.circular(8),
+                                borderSide: BorderSide(
+                                  color: isDarkMode
+                                      ? Colors.grey[700]!
+                                      : Colors.grey,
+                                  width: 1,
                                 ),
                               ),
-                            ),
-                            keyboardType: TextInputType.emailAddress,
-                            autocorrect: false,
-                            textCapitalization: TextCapitalization.none,
-                          ),
-                          const SizedBox(
-                            height: 12,
-                          ),
-                          TextFormField(
-                            validator: (value) {
-                              if (value == null || value.trim().length < 6) {
-                                return 'Password can\'t be less than 6 character';
-                              }
-                              return null;
-                            },
-                            onSaved: (newValue) => _enterdPasswoud = newValue!,
-                            decoration: InputDecoration(
-                              label: Text(
-                                'Password',
-                                style: GoogleFonts.alef(
-                                  fontWeight: FontWeight.w400,
-                                  fontSize: 18,
+                              enabledBorder: OutlineInputBorder(
+                                borderRadius: BorderRadius.circular(8),
+                                borderSide: BorderSide(
+                                  color: isDarkMode
+                                      ? Colors.grey[700]!
+                                      : Colors.grey,
+                                  width: 1,
                                 ),
                               ),
-                            ),
-                            obscureText: true,
-                          ),
-                          const SizedBox(
-                            height: 20,
-                          ),
-                          if (_isUploading) const CircularProgressIndicator(),
-                          if (!_isUploading)
-                            ElevatedButton(
-                              onPressed: _supmit,
-                              style: TextButton.styleFrom(
-                                  backgroundColor: MyColors.primary,
-                                  fixedSize: const Size(120, 60)),
-                              child: Text(
-                                _islogin ? 'Login' : 'Sign Up',
-                                style: GoogleFonts.alef(
-                                  fontWeight: FontWeight.w400,
-                                  fontSize: 18,
+                              focusedBorder: OutlineInputBorder(
+                                borderRadius: BorderRadius.circular(8),
+                                borderSide: BorderSide(
+                                  color: isDarkMode
+                                      ? MyColors.primary
+                                      : Colors.grey,
+                                  width: 1,
                                 ),
                               ),
+                              fillColor: isDarkMode
+                                  ? MyColors.MyDarkTheme
+                                  : Colors.white,
+                              filled: true,
                             ),
-                          const SizedBox(
-                            height: 12,
                           ),
-                          if (!_isUploading)
-                            Row(
-                              mainAxisAlignment: MainAxisAlignment.center,
-                              children: [
-                                if (_islogin)
-                                  Text(
-                                    'don`t have an account?',
-                                    style: GoogleFonts.alef(
-                                      fontWeight: FontWeight.w400,
-                                      fontSize: 18,
-                                    ),
-                                  ),
-                                TextButton(
-                                  onPressed: () {
-                                    setState(() {
-                                      _islogin = !_islogin;
-                                    });
-                                  },
-                                  child: Text(
-                                    _islogin
-                                        ? 'register'
-                                        : 'I allredy have an account',
-                                    style: GoogleFonts.alef(
-                                      fontWeight: FontWeight.w400,
-                                      fontSize: 18,
-                                    ),
-                                  ),
-                                ),
-                              ],
-                            ),
                         ],
                       ),
-                    ),
+                      const SizedBox(height: 22),
+                      CustomButton(
+                        label: _islogin ? 'SIGN IN' : 'SIGN UP',
+                        onPressed: _isUploading ? () {} : _submit,
+                        isLoading: _isUploading,
+                      ),
+                      const SizedBox(height: 14),
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          Text(
+                            _islogin
+                                ? "Don't have an account? "
+                                : "Already have an account? ",
+                            style: TextStyle(
+                              fontSize: 15,
+                              color: isDarkMode
+                                  ? Colors.grey[300]
+                                  : Colors.grey[700],
+                            ),
+                          ),
+                          GestureDetector(
+                            onTap: () {
+                              setState(() {
+                                _islogin = !_islogin;
+                              });
+                            },
+                            child: Text(
+                              _islogin ? 'SIGN UP' : 'LOGIN',
+                              style: TextStyle(
+                                fontWeight: FontWeight.bold,
+                                color: MyColors.buttonPrimary,
+                                fontSize: 15,
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
+                      const SizedBox(height: 18),
+                      Text(
+                        'By submitting this form, you agree with\nTerms and Condition and Privacy Policy',
+                        textAlign: TextAlign.center,
+                        style: TextStyle(
+                          color:
+                              isDarkMode ? Colors.grey[400] : Colors.grey[500],
+                          fontSize: 12,
+                        ),
+                      ),
+                    ],
                   ),
                 ),
-              )
-            ],
+              ),
+            ),
           ),
-        ),
+          if (_isUploading)
+            Container(
+              color: isDarkMode
+                  ? Colors.black.withOpacity(0.4)
+                  : Colors.black.withOpacity(0.2),
+              child: Center(
+                child: LoadingAnimationWidget.staggeredDotsWave(
+                  color: isDarkMode ? MyColors.white : MyColors.primary,
+                  size: 50,
+                ),
+              ),
+            ),
+        ],
       ),
     );
   }

@@ -8,6 +8,7 @@ import 'package:loading_animation_widget/loading_animation_widget.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:study_hub/core/constants/colors.dart';
 import 'package:awesome_snackbar_content/awesome_snackbar_content.dart';
+import 'package:study_hub/core/helpers/helper_functions.dart';
 import 'package:study_hub/core/widget/custom_button.dart';
 import 'package:study_hub/feature/text_to_speach/data/text_to_speech_repository.dart';
 import 'package:study_hub/feature/text_to_speach/logic/bloc/text_to_speech_bloc.dart';
@@ -38,9 +39,22 @@ class _TextToSpeechViewState extends State<_TextToSpeechView> {
 
   @override
   Widget build(BuildContext context) {
+    final isDarkMode = MyHelperFunctions.isDarkMode(context);
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Text to Speech'),
+        centerTitle: true,
+        backgroundColor: Colors.transparent,
+        elevation: 0,
+        iconTheme:
+            IconThemeData(color: isDarkMode ? Colors.white : Colors.black),
+        title: Text(
+          "Text to Speech",
+          style: TextStyle(
+            fontWeight: FontWeight.bold,
+            color: MyColors.buttonPrimary,
+            fontSize: MediaQuery.of(context).size.width * 0.08,
+          ),
+        ),
       ),
       body: BlocConsumer<TextToSpeechBloc, TextToSpeechState>(
         listener: (context, state) {
@@ -85,7 +99,7 @@ class _TextToSpeechViewState extends State<_TextToSpeechView> {
                       const Text(
                         'Enter text to generate speech',
                         style: TextStyle(
-                            fontSize: 18, fontWeight: FontWeight.bold),
+                            fontSize: 22, fontWeight: FontWeight.bold),
                       ),
                       const SizedBox(height: 20),
                       TextField(
@@ -327,17 +341,18 @@ class _VoicePlayerState extends State<VoicePlayer> {
 
   @override
   Widget build(BuildContext context) {
+    final isDarkMode = MyHelperFunctions.isDarkMode(context);
     return Container(
-      padding: const EdgeInsets.all(16.0),
+      padding: EdgeInsets.all(16.0),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: isDarkMode ? MyColors.MyDarkTheme : Colors.white,
         borderRadius: BorderRadius.circular(12),
         boxShadow: [
           BoxShadow(
             color: Colors.grey.withOpacity(0.2),
             spreadRadius: 2,
-            blurRadius: 8,
-            offset: const Offset(0, 3),
+            blurRadius: 2,
+            offset: const Offset(0, 1),
           ),
         ],
       ),

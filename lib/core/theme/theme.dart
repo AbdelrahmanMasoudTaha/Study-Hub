@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:study_hub/core/helpers/helper_functions.dart';
 import 'package:study_hub/core/theme/widget_themes/appbar_theme.dart';
 import 'package:study_hub/core/theme/widget_themes/chip_theme.dart';
 import 'package:study_hub/core/theme/widget_themes/text_field_theme.dart';
@@ -54,7 +55,6 @@ TextStyle get headingStyle {
       textStyle: TextStyle(
     fontWeight: FontWeight.bold,
     fontSize: 24,
-    color: Get.isDarkMode ? Colors.white : Colors.black,
   ));
 }
 
